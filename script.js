@@ -1,61 +1,100 @@
-document.getElementById("start-btn").addEventListener("click", startQuiz);
+const video = document.getElementById("video");
+const captureBtn = document.getElementById("capture-btn");
+const loading = document.getElementById("loading");
+const result = document.getElementById("result");
+const reactionImages = document.getElementById("reaction-images");
+const imageGallery = document.getElementById("image-gallery");
+const downloadBtn = document.getElementById("download-btn");
 
-const questions = [
-    { question: "Kaj pride pred številko 10?", answers: ["8", "9", "11", "12"] },
-    { question: "Kaj je rezultat 5 + 3 * 2?", answers: ["16", "13", "10", "11"] },
-    { question: "Kako se reče kocki v angleščini?", answers: ["Block", "Cube", "Square", "Dice"] },
-    { question: "Koliko nog ima pajek?", answers: ["6", "8", "10", "12"] },
-    { question: "Koliko črk ima beseda 'programiranje'?", answers: ["11", "12", "13", "14"] }
-];
+let stream;
+let capturedImages = []; // Shranjevanje slik za ZIP
 
-let currentQuestion = 0;
-let timeLeft = 30;
-let timer;
+// Aktivira zadnjo kamero
+navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+    .then(s => {
+        stream = s;
+        video.srcObject = stream;
+    })
+    .catch(err => console.error("Napaka pri dostopu do kamere:", err));
 
-function startQuiz() {
-    document.getElementById("start-btn").classList.add("hidden");
-    document.getElementById("timer").classList.remove("hidden");
-    document.getElementById("quiz").classList.remove("hidden");
-    
-    timer = setInterval(() => {
-        timeLeft--;
-        document.getElementById("time").textContent = timeLeft;
-        if (timeLeft <= 0) {
-            clearInterval(timer);
-            showResult();
-        }
-    }, 1000);
+captureBtn.addEventListener("click", () => {
+    captureBtn.classList.add("hidden");
+    loading.classList.remove("hidden");
 
-    showQuestion();
-}
+    setTimeout(() => {
+        loading.classList.add("hidden");
+        result.classList.remove("hidden");
 
-function showQuestion() {
-    if (currentQuestion < questions.length) {
-        let q = questions[currentQuestion];
-        document.getElementById("question").textContent = q.question;
-        
-        let answersDiv = document.getElementById("answers");
-        answersDiv.innerHTML = "";
-        
-        q.answers.forEach(answer => {
-            let btn = document.createElement("button");
-            btn.textContent = answer;
-            btn.onclick = nextQuestion;
-            answersDiv.appendChild(btn);
-        });
-    } else {
-        clearInterval(timer);
-        showResult();
+        // Preklopi na sprednjo kamero
+        switchToFrontCamera();
+
+    }, 5000);
+});
+
+function switchToFrontCamera() {
+    if (stream) {
+        stream.getTracks().forEach(track => track.stop());
     }
+
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })
+        .then(s => {
+            stream = s;
+            video.srcObject = stream;
+            captureReaction();
+        })
+        .catch(err => console.error("Napaka pri preklopu na sprednjo kamero:", err));
 }
 
-function nextQuestion() {
-    currentQuestion++;
-    showQuestion();
+function captureReaction() {
+    reactionImages.classList.remove("hidden");
+
+    let count = 0;
+    capturedImages = []; // Resetiranje slik pred zajemanjem
+
+    const interval = setInterval(() => {
+        if (count >= 5) {
+            clearInterval(interval);
+            showDownloadButton(); // Ko so vse slike shranjene, prikažemo gumb za prenos
+            return;
+        }
+
+        const canvas = document.createElement("canvas");
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        const img = document.createElement("img");
+        img.src = canvas.toDataURL("image/png");
+        imageGallery.appendChild(img);
+
+        // Shranimo sliko v seznam za ZIP prenos
+        capturedImages.push({ name: `reakcija-${count + 1}.png`, data: img.src });
+
+        count++;
+    }, 1000);
 }
 
-function showResult() {
-    document.getElementById("quiz").classList.add("hidden");
-    document.getElementById("timer").classList.add("hidden");
-    document.getElementById("result").classList.remove("hidden");
+function showDownloadButton() {
+    downloadBtn.classList.remove("hidden");
+    downloadBtn.addEventListener("click", downloadImages);
+}
+
+function downloadImages() {
+    let zip = new JSZip();
+    let imgFolder = zip.folder("reakcija");
+
+    capturedImages.forEach((image, index) => {
+        let imgData = image.data.split(",")[1]; // Odstranimo "data:image/png;base64,"
+        imgFolder.file(image.name, imgData, { base64: true });
+    });
+
+    zip.generateAsync({ type: "blob" }).then(content => {
+        let link = document.createElement("a");
+        link.href = URL.createObjectURL(content);
+        link.download = "reakcija.zip";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    });
 }

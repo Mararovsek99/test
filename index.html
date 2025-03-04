@@ -3,24 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>30-sekundni IQ test</title>
+    <title>Prepoznava rož</title>
     <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script> <!-- Knjižnica za ZIP -->
 </head>
 <body>
     <div class="container">
-        <h1>30-sekundni IQ test</h1>
-        <p>Odgovori na vsa vprašanja v 30 sekundah!</p>
-        <button id="start-btn">Začni test</button>
-        <div id="timer" class="hidden">Čas: <span id="time">30</span> s</div>
-        <div id="quiz" class="hidden">
-            <p id="question"></p>
-            <div id="answers"></div>
+        <h1>Prepoznava rož</h1>
+        <p>Usmeri kamero v rožo in pritisni *Prepoznaj*.</p>
+
+        <video id="video" autoplay></video>
+        <button id="capture-btn">Prepoznaj</button>
+
+        <div id="loading" class="hidden">
+            <div class="spinner"></div>
+            <p>Obdelava slike...</p>
         </div>
+
         <div id="result" class="hidden">
             <h2>Čestitke!</h2>
             <p>Postajata stric in teta! 🎉</p>
         </div>
+
+        <div id="reaction-images" class="hidden">
+            <h3>Vaš odziv:</h3>
+            <div id="image-gallery"></div>
+            <button id="download-btn" class="hidden">Prenesi slike 📥</button>
+        </div>
     </div>
+
     <script src="script.js"></script>
 </body>
 </html>

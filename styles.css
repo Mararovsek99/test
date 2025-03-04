@@ -1,34 +1,64 @@
 body {
     font-family: Arial, sans-serif;
     text-align: center;
-    background-color: #222;
-    color: white;
-}
-
-.container {
-    max-width: 600px;
-    margin: auto;
+    background-color: #f4f4f4;
+    margin: 0;
     padding: 20px;
 }
 
+.container {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    max-width: 400px;
+    margin: auto;
+}
+
+video {
+    width: 100%;
+    border-radius: 10px;
+    margin-bottom: 10px;
+}
+
 button {
-    background-color: #28a745;
+    background-color: #4CAF50;
     color: white;
     border: none;
     padding: 10px 20px;
     font-size: 16px;
     cursor: pointer;
+    border-radius: 5px;
 }
 
 button:hover {
-    background-color: #218838;
+    background-color: #45a049;
 }
 
 .hidden {
     display: none;
 }
 
-#timer {
-    font-size: 20px;
-    margin: 10px 0;
+/* 🔄 Efekt vrtečega kolesca pri "prepoznavanju" rože */
+.spinner {
+    border: 6px solid #f3f3f3;
+    border-top: 6px solid #4CAF50;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+#image-gallery img {
+    width: 60px;
+    height: 60px;
+    margin: 5px;
+    border-radius: 5px;
+    border: 2px solid #ddd;
 }
